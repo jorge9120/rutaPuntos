@@ -14,9 +14,9 @@ export class Tab1Page {
   map: any;
   directionsService = new google.maps.DirectionsService();
   directionsDisplay = new google.maps.DirectionsRenderer();
-  origin = {lat: 6.2562147, lng: -75.5776661};
+  origin = { lat: 6.2562147, lng: -75.5776661 };
 
-  destination = {lat: 6.2592696, lng: -75.58587729999999};
+  destination = { lat: 6.2592696, lng: -75.58587729999999 };
 
   constructor(
     private geolocation: Geolocation,
@@ -24,31 +24,55 @@ export class Tab1Page {
   ) {
 
   }
-
+  degrees_to_radians(degrees) {
+    const pi = Math.PI;
+    return degrees * (pi / 180);
+  }
   ngOnInit() {
     this.loadMap();
     //this.addMaker(6.2562147,-75.5776661);
   }
+  /*
+  *Distancia entre dos puntos
+  */
+  distanciasAyB() {
+    const rlat0 = this.degrees_to_radians(this.origin.lat);
+    const rlng0 = this.degrees_to_radians(this.origin.lng);
+    const rlat1 = this.degrees_to_radians(this.destination.lat);
+    const rlng1 = this.degrees_to_radians(this.destination.lng);
 
+    const latDelta = rlat1 - rlat0;
+    const lonDelta = rlng1 - rlng0;
+
+    const distance = (6371 *
+      Math.acos(
+        Math.cos(rlat0) * Math.cos(rlat1) * Math.cos(lonDelta) +
+        Math.sin(rlat0) * Math.sin(rlat1)
+      )
+    );
+    const roundDist = Math.round(distance * 1000) / 1000
+    console.log("Distancia entre A y B: " + roundDist + " km")
+  }
   async loadMap() {
-
+    // tslint:disable-next-line:prefer-const
+    this.distanciasAyB();
 
     const mapEle: HTMLElement = document.getElementById('map');
     const indicatorsEle: HTMLElement = document.getElementById('indicators');
-  // create map
+    // create map
     this.map = new google.maps.Map(mapEle, {
-    center: this.origin,
-    zoom: 12
-  });
+      center: this.origin,
+      zoom: 12
+    });
 
     this.directionsDisplay.setMap(this.map);
     this.directionsDisplay.setPanel(indicatorsEle);
 
     google.maps.event.addListenerOnce(this.map, 'idle', () => {
-    mapEle.classList.add('show-map');
-    this.calculateRoute();
-   // this.addMaker(6.2562147, -75.5776661);
-  });
+      mapEle.classList.add('show-map');
+      this.calculateRoute();
+      // this.addMaker(6.2562147, -75.5776661);
+    });
 
   }
   //para agregar un punto de referencia en el mapa
@@ -73,14 +97,14 @@ export class Tab1Page {
       origin: this.origin,
       destination: this.destination,
       travelMode: google.maps.TravelMode.DRIVING,
-    }, (response, status)  => {
+    }, (response, status) => {
       if (status === google.maps.DirectionsStatus.OK) {
         this.directionsDisplay.setDirections(response);
       } else {
         alert('Could not display directions due to: ' + status);
       }
     });
-    }
+  }
 
 
 }
